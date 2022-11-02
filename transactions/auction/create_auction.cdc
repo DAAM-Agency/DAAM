@@ -3,7 +3,7 @@
 
 import AuctionHouse     from 0x045a1763c93006ca
 import NonFungibleToken from 0x1d7e57aa55817448
-import DAAM             from 0x7db4d10c78bad30a
+import DAAM_V1             from 0x7db4d10c78bad30a
 import FUSD             from 0x509abbf4f85f3d73
 
 transaction(isMetadata: Bool, id: UInt64, start: UFix64, length: UFix64, isExtended: Bool, extendedTime: UFix64,
@@ -30,7 +30,7 @@ transaction(isMetadata: Bool, id: UInt64, start: UFix64, length: UFix64, isExten
 
   prepare(auctioneer: AuthAccount) {
     self.auctionHouse  = auctioneer.borrow<&AuctionHouse.AuctionWallet>(from: AuctionHouse.auctionStoragePath)!
-    self.nftCollection = auctioneer.borrow<&DAAMDAAM_V1.Collection>(from: DAAM.collectionStoragePath)!
+    self.nftCollection = auctioneer.borrow<&DAAMDAAM_V1.Collection>(from: DAAM_V1.collectionStoragePath)!
     self.metadataCap  = (isMetadata) ? auctioneer.getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>(DAAM.metadataPublicPath) : nil
 
     self.id               = id

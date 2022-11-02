@@ -4,7 +4,7 @@
 import FungibleToken from 0xf233dcee88fe0abe 
 import Categories    from 0x7db4d10c78bad30a
 import MetadataViews from 0x1d7e57aa55817448
-import DAAM          from 0x7db4d10c78bad30a
+import DAAM_V1          from 0x7db4d10c78bad30a
 
 // argument have two modes:
 // when ipfs = true; first arument is cid, second argument is path 
@@ -14,7 +14,7 @@ pub fun setFile(ipfs: Bool, string_cid: String, type_path: String?): {MetadataVi
     if ipfs { return MetadataViews.IPFSFile(cid: string_cid, path: type_path) }
     switch type_path! {
         case "http": return MetadataViews.HTTPFile(url: string_cid)
-        default: return DAAM.OnChain(file: string_cid)
+        default: return DAAM_V1.OnChain(file: string_cid)
     }
 }
 
@@ -40,8 +40,8 @@ transaction(name: String, max: UInt64?, categories: [String], description: Strin
 
     prepare(creator: AuthAccount) {
         self.creatorCap  = creator.getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
-        self.metadataGen = creator.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM.metadataStoragePath)!
-        self.requestGen  = creator.borrow<&DAAMDAAM_V1.RequestGenerator>( from: DAAM.requestStoragePath)!
+        self.metadataGen = creator.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM_V1.metadataStoragePath)!
+        self.requestGen  = creator.borrow<&DAAMDAAM_V1.RequestGenerator>( from: DAAM_V1.requestStoragePath)!
 
         self.name         = name
         self.max          = max

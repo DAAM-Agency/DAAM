@@ -7,7 +7,7 @@ import DAAM_Profile     from 0x509abbf4f85f3d73
 import Categories       from 0x7db4d10c78bad30a
 
 /************************************************************************/
-pub contract DAAM: NonFungibleToken {
+pub contract DAAM_V1: NonFungibleToken {
     // Events
     pub event ContractInitialized()
     pub event Withdraw(id: UInt64, from: Address?) // Collection Wallet, used to withdraw NFT
@@ -67,8 +67,8 @@ pub contract DAAM: NonFungibleToken {
     // Variables 
     access(contract) var metadataCounterID : UInt64   // The Metadta ID counter for MetadataID.
     access(contract) var newNFTs: [UInt64]    // A list of newly minted NFTs. 'New' is defined as 'never sold'. Age is Not a consideration.
-    pub let agency : MetadataViews.Royalties  // DAAM Agency Founder Royaly Addresses
-    pub let company: MetadataViews.Royalty    // DAAM Company Address
+    pub let agency : MetadataViews.Royalties  // DAAM_V1 Agency Founder Royaly Addresses
+    pub let company: MetadataViews.Royalty    // DAAM_V1 Company Address
 /***********************************************************************/
 // Copyright enumeration status // Worst(0) to best(4) as UInt8
 pub enum CopyrightStatus: UInt8 {
@@ -88,10 +88,10 @@ pub resource Request {
     access(contract) var agreement : [Bool; 2]                // State of agreement [Admin (agrees/disagres),  Creator(agree/disagree)]
     
     init(mid: UInt64) {
-        pre { mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate" }
+        pre { mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate" }
 
         self.mid = mid          // Get Metadata ID
-        DAAM.metadata[self.mid] != false // Can set a Request as long as the Metadata has not been Disapproved as oppossed to Aprroved or Not Set.
+        DAAM_V1.metadata[self.mid] != false // Can set a Request as long as the Metadata has not been Disapproved as oppossed to Aprroved or Not Set.
         self.royalty = nil               // royalty is initialized
         self.agreement = [false, false]  // [Agency/Admin, Creator] are both set to Disagree by default
     }    
@@ -161,11 +161,11 @@ pub resource RequestGenerator {
         pre {
             !DAAM.request.containsKey(mid) : "Already made request for this MID."
 
-            DAAM.isCreator(self.owner!.address) == true || DAAM.isAdmin(self.owner!.address) == true
+            DAAM_V1.isCreator(self.owner!.address) == true || DAAM_V1.isAdmin(self.owner!.address) == true
             : "You do not have access"
         }
         let request <-! create Request(mid: mid)!
-        let old <- DAAM.request.insert(key: mid, <-request) // advice DAAM of request
+        let old <- DAAM_V1.request.insert(key: mid, <-request) // advice DAAM_V1 of request
         destroy old
                     
         log("Royality Request: ".concat(mid.toString()) )
@@ -176,16 +176,16 @@ pub resource RequestGenerator {
     // Percentages are between 10% - 30%
     pub fun acceptDefault(mid: UInt64, metadataGen: &MetadataGenerator{MetadataGeneratorPublic}, royalties: MetadataViews.Royalties) {
         pre {
-            mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
+            mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
             self.grantee == self.owner!.address     : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
             metadataGen.getMIDs().contains(mid)     : "MID: ".concat(mid.toString()).concat(" is Incorrect")
-            DAAM.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat("You are not a Creator")
-            DAAM.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat("Your Creator account is Frozen.")
+            DAAM_V1.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat("You are not a Creator")
+            DAAM_V1.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat("Your Creator account is Frozen.")
             //percentage >= 0.1 && percentage <= 0.3  : "Percentage must be inbetween 10% to 30%."
         }
 
         // Getting Agency royalties
-        let agency   = DAAM.agency.getRoyalties()
+        let agency   = DAAM_V1.agency.getRoyalties()
         let rate     = 0.025
         var royalty_list: [MetadataViews.Royalty] = []
         
@@ -205,9 +205,9 @@ pub resource RequestGenerator {
             rateCut = rateCut + (creator.cut - newCut)
             // Update Creator History
             if !DAAM.creatorHistory.containsKey(creator.receiver.address) {
-                DAAM.creatorHistory[creator.receiver.address] = [mid]
+                DAAM_V1.creatorHistory[creator.receiver.address] = [mid]
             } else if !DAAM.creatorHistory[creator.receiver.address]!.contains(mid) {
-                DAAM.creatorHistory[creator.receiver.address]!.append(mid)
+                DAAM_V1.creatorHistory[creator.receiver.address]!.append(mid)
             }
         }
         assert(totalCut >= 0.01 && totalCut <= 0.3, message: "Percentage must be inbetween 10% to 30%.")
@@ -226,7 +226,7 @@ pub resource RequestGenerator {
         let newRoyalties = MetadataViews.Royalties(royalty_list)
         request.acceptDefault(royalty: newRoyalties)  // append royalty rate
 
-        let old <- DAAM.request.insert(key: mid, <-request) // advice DAAM of request
+        let old <- DAAM_V1.request.insert(key: mid, <-request) // advice DAAM_V1 of request
         destroy old // destroy place holder
         
         log("Request Accepted, MID: ".concat(mid.toString()) )
@@ -246,7 +246,7 @@ pub resource RequestGenerator {
         
         init(creator: CreatorInfo, mid: UInt64, edition: MetadataViews.Edition, categories: [Categories.Category],
             description: String, misc: String, thumbnail: {String : {MetadataViews.File}}) {
-            pre { mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate" }
+            pre { mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate" }
 
             self.mid          = mid
             self.creatorInfo  = creator      // creator of NFT
@@ -273,7 +273,7 @@ pub resource RequestGenerator {
             thumbnail: {String:{MetadataViews.File}}?, interact: AnyStruct?, file: {String:MetadataViews.Media}?, metadata: &Metadata?)
         {            
             pre {
-                DAAM.validInteract(interact) : "This Interaction is not Authorized"
+                DAAM_V1.validInteract(interact) : "This Interaction is not Authorized"
                 max != 0 : "Max has an incorrect value of 0."
                 // Increment Metadata Counter; Make sure Arguments are blank except for Metadata; This also excludes all non consts
                 (creator==nil && name==nil && categories==nil && description==nil && misc==nil && thumbnail==nil && file==nil && metadata != nil)
@@ -283,8 +283,8 @@ pub resource RequestGenerator {
             }
 
             if metadata == nil {
-                DAAM.metadataCounterID = DAAM.metadataCounterID + 1
-                self.mid         = DAAM.metadataCounterID // init MID with counter
+                DAAM_V1.metadataCounterID = DAAM_V1.metadataCounterID + 1
+                self.mid         = DAAM_V1.metadataCounterID // init MID with counter
                 self.creatorInfo = creator!               // creator of NFT
                 self.edition     = MetadataViews.Edition(name: name, number: 1, max: max) // total prints
                 self.category    = categories!            // categories 
@@ -349,7 +349,7 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
             self.metadata <- {}  // Init Metadata
             self.returns <- {}   // Metadata Returns, when a metadata is not sold
             self.grantee = grantee
-            DAAM.metadataCap.insert(key: self.grantee, getAccount(self.grantee).getCapability<&MetadataGenerator{MetadataGeneratorPublic}>(DAAM.metadataPublicPath))
+            DAAM_V1.metadataCap.insert(key: self.grantee, getAccount(self.grantee).getCapability<&MetadataGenerator{MetadataGeneratorPublic}>(DAAM.metadataPublicPath))
         }
 
         // addMetadata: Used to add a new Metadata. This sets up the Metadata to be approved by the Admin. Returns the new mid.
@@ -358,11 +358,11 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
         {
             pre{
                 self.grantee == self.owner!.address     : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
-                DAAM.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat("You are not a Creator")
-                DAAM.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat("Your Creator account is Frozen.")
+                DAAM_V1.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat("You are not a Creator")
+                DAAM_V1.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat("Your Creator account is Frozen.")
             }
 
-            let metadata <- create Metadata(creator: DAAM.creators[self.grantee], name: name, max: max, categories: categories,
+            let metadata <- create Metadata(creator: DAAM_V1.creators[self.grantee], name: name, max: max, categories: categories,
                 description: description, misc: misc, thumbnail: thumbnail, interact: interact, file: file, metadata: nil) // Create Metadata
             let mid = metadata.mid
             let old <- self.metadata[mid] <- metadata // Save Metadata
@@ -376,10 +376,10 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
 
         // Save Metadata & set copyright setting
         access(contract) fun saveMID(mid: UInt64)  {
-            DAAM.metadata.insert(key: mid, false)   // a metadata ID for Admin approval, currently unapproved (false)
-            DAAM.copyright.insert(key: mid, CopyrightStatus.UNVERIFIED) // default copyright setting
+            DAAM_V1.metadata.insert(key: mid, false)   // a metadata ID for Admin approval, currently unapproved (false)
+            DAAM_V1.copyright.insert(key: mid, CopyrightStatus.UNVERIFIED) // default copyright setting
 
-            DAAM.metadata[mid] = true // TODO REMOVE AUTO-APPROVE AFTER DEVELOPMENT
+            DAAM_V1.metadata[mid] = true // TODO REMOVE AUTO-APPROVE AFTER DEVELOPMENT
 
             log("Metadata Generatated ID: ".concat(mid.toString()) )
             emit AddMetadata(creator: self.grantee, mid: mid)
@@ -389,24 +389,24 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
         // But when deleting a submission the request must also be deleted.
         pub fun removeMetadata(mid: UInt64) {
             pre {
-                mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
+                mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
                 self.grantee == self.owner!.address     : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
-                DAAM.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat("You are not a Creator")
-                DAAM.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat("Your Creator account is Frozen.")
+                DAAM_V1.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat("You are not a Creator")
+                DAAM_V1.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat("Your Creator account is Frozen.")
                 self.metadata[mid] != nil               : "MetadataID: ".concat(mid.toString()).concat(" does not exist.")
             }
             let old_meta <- self.clearMetadata(mid: mid)  // Delete Metadata
             destroy old_meta
 
-            let old_request <- DAAM.request.remove(key: mid)  // Get Request
+            let old_request <- DAAM_V1.request.remove(key: mid)  // Get Request
             destroy old_request // Delete Request
         }
 
         // Used to remove Metadata from the Creators metadata dictionary list.
         priv fun clearMetadata(mid: UInt64): @Metadata {         
-            pre { mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate" }
-            DAAM.metadata.remove(key: mid) // Metadata removed from DAAM. Logging no longer neccessary
-            DAAM.copyright.remove(key:mid) // remove metadata copyright            
+            pre { mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate" }
+            DAAM_V1.metadata.remove(key: mid) // Metadata removed from DAAM_V1. Logging no longer neccessary
+            DAAM_V1.copyright.remove(key:mid) // remove metadata copyright            
             
             log("Destroyed Metadata")
             emit RemovedMetadata(mid: mid)
@@ -419,12 +419,12 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
             pre {
                 self.grantee == self.owner!.address     : "Account: ".concat(self.grantee.toString()).concat(" Permission Denied")
                 minter.validate(creator: self.grantee)  : "Account: ".concat(self.grantee.toString()).concat(" Minter Access Denied")
-                DAAM.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat(" You are not a Creator")
-                DAAM.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat(" Your Creator account is Frozen.")
+                DAAM_V1.creators.containsKey(self.grantee) : "Account: ".concat(self.grantee.toString()).concat(" You are not a Creator")
+                DAAM_V1.isCreator(self.grantee) == true    : "Account: ".concat(self.grantee.toString()).concat(" Your Creator account is Frozen.")
                 
                 self.metadata[minter.mid] != nil : "MetadataID: ".concat(minter.mid.toString()).concat(" does not exist.")
-                DAAM.metadata[minter.mid] != nil : "MetadataID: ".concat(minter.mid.toString()).concat(" This already has been published.")
-                DAAM.metadata[minter.mid]!       : "MetadataID: ".concat(minter.mid.toString()).concat(" Submission has been Disapproved.")
+                DAAM_V1.metadata[minter.mid] != nil : "MetadataID: ".concat(minter.mid.toString()).concat(" This already has been published.")
+                DAAM_V1.metadata[minter.mid]!       : "MetadataID: ".concat(minter.mid.toString()).concat(" Submission has been Disapproved.")
             }
             let mid = minter.mid
             destroy minter
@@ -484,7 +484,7 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
 
         pub fun viewMetadata(mid: UInt64): MetadataHolder? {
             pre {
-                mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
+                mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
                 self.metadata[mid] != nil : "MetadataID: ".concat(mid.toString()).concat(" is not a valid Entry.")
             }
             let mRef = &self.metadata[mid] as &Metadata?
@@ -503,7 +503,7 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
 
         pub fun viewDisplay(mid: UInt64): MetadataViews.Display? {
             pre {
-                mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
+                mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
                 self.metadata[mid] != nil : "MetadataID: ".concat(mid.toString()).concat(" is not a valid Entry.")
             }
             let mRef = &self.metadata[mid] as &Metadata?
@@ -521,7 +521,7 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
 
         pub fun getFile(mid: UInt64): {String: MetadataViews.Media} {
             pre {
-                mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
+                mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
                 self.metadata[mid] != nil : "MetadataID: ".concat(mid.toString()).concat(" is not a valid Entry.")
             }
             let mRef = &self.metadata[mid] as &Metadata?
@@ -553,8 +553,8 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
                 request!.royalty!.getRoyalties().length > 0 : "There must be at least Royalty Entry."
             }
             
-            DAAM.totalSupply = DAAM.totalSupply + 1 // Increment total supply
-            self.id          = DAAM.totalSupply     // Set Token ID with total supply
+            DAAM_V1.totalSupply = DAAM_V1.totalSupply + 1 // Increment total supply
+            self.id          = DAAM_V1.totalSupply     // Set Token ID with total supply
             self.mid         = metadata.mid         // Set Metadata ID
             self.royalty     = request!.royalty!     // Save Request which are the royalities.  
             self.metadata    = metadata.getHolder() // Save Metadata from Metadata Holder
@@ -563,7 +563,7 @@ pub resource MetadataGenerator: MetadataGeneratorPublic, MetadataGeneratorMint {
         }
 
         pub fun getCopyright(): CopyrightStatus { // Get current NFT Copyright status
-            return DAAM.copyright[self.id]! // return copyright status
+            return DAAM_V1.copyright[self.id]! // return copyright status
         }
 
         pub fun getViews(): [Type] { return [Type<MetadataHolder>(), Type<MetadataViews.Display>()]}
@@ -588,7 +588,7 @@ pub struct OnChain: MetadataViews.File {
 /************************************************************************/
 // Wallet Public standards. For Public access only
 pub resource interface CollectionPublic {
-    pub fun borrowDAAM(id: UInt64): &DAAMDAAM_V1.NFT // Get NFT as DAAM.NFT
+    pub fun borrowDAAM(id: UInt64): &DAAMDAAM_V1.NFT // Get NFT as DAAM_V1.NFT
     pub fun getCollection(): {String: NFTCollectionDisplay{CollectionDisplay}}
     pub fun depositByAgent(token: @NonFungibleToken.NFT, name: String, feature: Bool, permission: &Admin{Agent})
 }
@@ -614,10 +614,10 @@ pub struct NFTCollectionDisplay: CollectionDisplay {
 
     pub fun addMID(creator: &Creator, mid: UInt64, feature: Bool) {
         pre  {
-            mid != 0 && mid <= DAAM.metadataCounterID : "Illegal Operation on MID"
+            mid != 0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation on MID"
             !self.mid.containsKey(mid)       : "Already is in this Collection."
-            DAAM.isCreator(creator.grantee) == true   : "You are not a Creator or your account is Frozen."
-            DAAM.creatorHistory[creator.grantee]!.contains(mid) : "This MID does not belong to this Creator."
+            DAAM_V1.isCreator(creator.grantee) == true   : "You are not a Creator or your account is Frozen."
+            DAAM_V1.creatorHistory[creator.grantee]!.contains(mid) : "This MID does not belong to this Creator."
         }
         post { self.mid.containsKey(mid)  : "Illegal Operation: addMID: ".concat(mid.toString()) }
 
@@ -632,10 +632,10 @@ pub struct NFTCollectionDisplay: CollectionDisplay {
 
     pub fun removeMID(creator: &Creator, mid: UInt64) {
         pre {
-            mid != 0 && mid <= DAAM.metadataCounterID : "Illegal Operation: removeMID (pre)" 
+            mid != 0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: removeMID (pre)" 
             self.mid.containsKey(mid) : "Already is not in this Collection."
-            DAAM.isCreator(creator.grantee) == true : "You are not a Creator or your account is Frozen."
-            DAAM.creatorHistory[creator.grantee]!.contains(mid) : "This MID does not belong to this Creator."
+            DAAM_V1.isCreator(creator.grantee) == true : "You are not a Creator or your account is Frozen."
+            DAAM_V1.creatorHistory[creator.grantee]!.contains(mid) : "This MID does not belong to this Creator."
         }
         post { !self.mid.containsKey(mid) : "Illegal Operation: removeMID (post) ".concat(mid.toString()) }
         self.mid.remove(key: mid)
@@ -650,8 +650,8 @@ pub struct NFTCollectionDisplay: CollectionDisplay {
     pub fun adjustFeatureByMID(creator: &Creator, mid: UInt64, feature: Bool) {
         pre {
             self.mid.containsKey(mid) : "You do not have MID: ".concat(mid.toString())
-            DAAM.isCreator(creator.grantee) == true   : "You are not a Creator or your account is Frozen."
-            DAAM.creatorHistory[creator.grantee]!.contains(mid) : "This MID does not belong to this Creator."
+            DAAM_V1.isCreator(creator.grantee) == true   : "You are not a Creator or your account is Frozen."
+            DAAM_V1.creatorHistory[creator.grantee]!.contains(mid) : "This MID does not belong to this Creator."
         }
         self.mid[mid] = feature
     }
@@ -697,9 +697,9 @@ pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, N
         switch view {
             /*
                 return MetadataViews.NFTCollectionData (
-                    storagePath: DAAM.collectionStoragePath,
-                    publicPath: DAAM.collectionPublicPath,
-                    providerPath: DAAM.collectionPrivatePath,
+                    storagePath: DAAM_V1.collectionStoragePath,
+                    publicPath: DAAM_V1.collectionPublicPath,
+                    providerPath: DAAM_V1.collectionPrivatePath,
                     publicCollection: Type<@DAAM.Collection>(),
                     publicLinkedType: Type<&DAAMDAAM_V1.Collection{DAAM.CollectionPublic, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection, MetadataViews.Resolver}>(),
                     providerLinkedType: ?????, // TODO  ???
@@ -728,7 +728,7 @@ pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, N
 
     // deposit takes a NFT and adds it to the collections dictionary and adds the ID to the id array
     pub fun deposit(token: @NonFungibleToken.NFT) {
-        let token <- token as! @DAAM.NFT // Get NFT as DAAM.GFT
+        let token <- token as! @DAAM.NFT // Get NFT as DAAM_V1.GFT
         let id = token.id        // Save Token ID
         // add the new token to the dictionary which removes the old one
         let oldToken <- self.ownedNFTs[id] <- token   // Store NFT
@@ -737,7 +737,7 @@ pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, N
     }
 
     pub fun depositByAgent(token: @NonFungibleToken.NFT, name: String, feature: Bool, permission: &Admin{Agent}) {
-        pre { DAAM.getAgentCreators(agent: permission.grantee)!.contains(self.owner?.address!) : "Permission Denied." }
+        pre { DAAM_V1.getAgentCreators(agent: permission.grantee)!.contains(self.owner?.address!) : "Permission Denied." }
 
         let id = token.id
         self.deposit(token: <-token)
@@ -753,7 +753,7 @@ pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, N
         return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
     }
 
-    // borrowDAAM gets a reference to an DAAM.NFT
+    // borrowDAAM gets a reference to an DAAM_V1.NFT
     pub fun borrowDAAM(id: UInt64): &DAAMDAAM_V1.NFT {
         pre { self.ownedNFTs[id] != nil : "Invalid TokenID" }
         let ref = (&self.ownedNFTs[id] as! auth &NonFungibleToken.NFT?)!
@@ -795,7 +795,7 @@ pub resource Admin: Agent
         // Used only when genreating a new Admin. Creates a Resource Generator for Negoiations.
         pub fun newRequestGenerator(): @RequestGenerator {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied. No proper Admin Status")
+                DAAM_V1.admins[self.owner!.address] == true  : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied. No proper Admin Status")
                 self.grantee == self.owner!.address       : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
                 self.status : "Account: ".concat(self.owner!.address.toString()).concat(" Access has been Frozen.") // status variable may be Depreicated // TODO check 
             }
@@ -804,39 +804,39 @@ pub resource Admin: Agent
 
         pub fun inviteAdmin(_ admin: Address) {     // Admin invite a new Admin
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
+                DAAM_V1.admins[self.owner!.address] == true  : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
                 self.grantee == self.owner!.address : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
                 self.status                    : "You're no longer a have Access."
-                DAAM.creators[admin] == nil : "A Admin can not use the same address as an Creator."
-                DAAM.agents[admin] == nil   : "A Admin can not use the same address as an Agent."
-                DAAM.admins[admin] == nil   : "They're already sa DAAM Admin!!!"
-                DAAM_Profile.check(admin) : "You can't be a DAAM Admin without a DAAM Profile! Go make one Fool!!"
+                DAAM_V1.creators[admin] == nil : "A Admin can not use the same address as an Creator."
+                DAAM_V1.agents[admin] == nil   : "A Admin can not use the same address as an Agent."
+                DAAM_V1.admins[admin] == nil   : "They're already sa DAAM_V1 Admin!!!"
+                DAAM_Profile.check(admin) : "You can't be a DAAM_V1 Admin without a DAAM_V1 Profile! Go make one Fool!!"
             }
-            post { DAAM.admins[admin] == false : "Illegal Operaion: inviteAdmin" }
+            post { DAAM_V1.admins[admin] == false : "Illegal Operaion: inviteAdmin" }
 
-            DAAM.admins.insert(key: admin, false) // Admin account is setup but not active untill accepted.
+            DAAM_V1.admins.insert(key: admin, false) // Admin account is setup but not active untill accepted.
             log("Sent Admin Invitation: ".concat(admin.toString()) )
             emit AdminInvited(admin: admin)                        
         }
 
         pub fun inviteAgent(_ agent: Address) {    // Admin ivites new Agent
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
+                DAAM_V1.admins[self.owner!.address] == true  : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
                 self.grantee == self.owner!.address : "Account: ".concat(self.owner!.address.toString()).concat(" Permission Denied")
                 self.status                 : "You're no longer a have Access."
-                DAAM.admins[agent] == nil   : "A Agent can not use the same address as an Admin."
-                DAAM.creators[agent] == nil : "A Agent can not use the same address as an Creator."
-                DAAM.agents[agent] == nil   : "They're already a DAAM Agent!!!"
-                DAAM_Profile.check(agent) : "You can't be a DAAM Admin without a DAAM Profile! Go make one Fool!!"
+                DAAM_V1.admins[agent] == nil   : "A Agent can not use the same address as an Admin."
+                DAAM_V1.creators[agent] == nil : "A Agent can not use the same address as an Creator."
+                DAAM_V1.agents[agent] == nil   : "They're already a DAAM_V1 Agent!!!"
+                DAAM_Profile.check(agent) : "You can't be a DAAM_V1 Admin without a DAAM_V1 Profile! Go make one Fool!!"
             }
 
             post {
-                DAAM.agents[agent] == false : "Illegal Operaion: invite Agent"
-                DAAM.admins[agent] == false : "Illegal Operaion: invite Agent"
+                DAAM_V1.agents[agent] == false : "Illegal Operaion: invite Agent"
+                DAAM_V1.admins[agent] == false : "Illegal Operaion: invite Agent"
             }
 
-            DAAM.admins.insert(key: agent, false) // Admin account is setup but not active untill accepted.
-            DAAM.agents.insert(key: agent, false )     // Agent account is setup but not active untill accepted.
+            DAAM_V1.admins.insert(key: agent, false) // Admin account is setup but not active untill accepted.
+            DAAM_V1.agents.insert(key: agent, false )     // Agent account is setup but not active untill accepted.
 
             log("Sent Agent Invitation: ".concat(agent.toString()) )
             emit AgentInvited(agent: agent)         
@@ -844,18 +844,18 @@ pub resource Admin: Agent
 
         pub fun inviteCreator(_ creator: Address, agentCut: UFix64 ) {    // Admin or Agent invite a new creator, agentCut = nil no agent
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address       : "Permission Denied"
                 self.status                   : "You're no longer a have Access."
-                DAAM.admins[creator]   == nil : "A Creator can not use the same address as an Admin."
-                DAAM.agents[creator]   == nil : "A Creator can not use the same address as an Agent."
-                DAAM.creators[creator] == nil : "They're already a DAAM Creator!!!"
-                DAAM_Profile.check(creator)        : "You can't be a DAAM Creator without a DAAM Profile! Go make one Fool!!"
+                DAAM_V1.admins[creator]   == nil : "A Creator can not use the same address as an Admin."
+                DAAM_V1.agents[creator]   == nil : "A Creator can not use the same address as an Agent."
+                DAAM_V1.creators[creator] == nil : "They're already a DAAM_V1 Creator!!!"
+                DAAM_Profile.check(creator)        : "You can't be a DAAM_V1 Creator without a DAAM_V1 Profile! Go make one Fool!!"
             }
-            post { DAAM.isCreator(creator) == false : "Illegal Operaion: inviteCreator" }
-            let agent: Address = DAAM.isAgent(self.owner!.address)==true ? self.owner!.address : DAAM.company.receiver.address 
+            post { DAAM_V1.isCreator(creator) == false : "Illegal Operaion: inviteCreator" }
+            let agent: Address = DAAM_V1.isAgent(self.owner!.address)==true ? self.owner!.address : DAAM_V1.company.receiver.address 
             let creatorInfo = CreatorInfo(creator: creator, agent: agent, firstSale: agentCut)
-            DAAM.creators.insert(key: creator,  creatorInfo) // Creator account is setup but not active untill accepted.
+            DAAM_V1.creators.insert(key: creator,  creatorInfo) // Creator account is setup but not active untill accepted.
             
             log("Sent Creator Invitation: ".concat(creator.toString()) )
             emit CreatorInvited(creator: creator)      
@@ -863,31 +863,31 @@ pub resource Admin: Agent
 
         pub fun inviteMinter(_ minter: Address) {   // Admin invites a new Minter (Key)
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status : "You're no longer a have Access."
             }
-            post { DAAM.minters[minter] == false : "Illegal Operaion: inviteCreator" }
+            post { DAAM_V1.minters[minter] == false : "Illegal Operaion: inviteCreator" }
 
-            DAAM.minters.insert(key: minter, false) // Minter Key is setup but not active untill accepted.
+            DAAM_V1.minters.insert(key: minter, false) // Minter Key is setup but not active untill accepted.
             log("Sent Minter Setup: ".concat(minter.toString()) )
             emit MinterSetup(minter: minter)      
         }
 
         pub fun removeAdmin(admin: Address) { // Two Admin to Remove Admin
             pre  {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status: "You're no longer a have Access."
             }
 
             let vote = 5 as Int // TODO change to x
-            DAAM.remove.insert(key: self.grantee, admin) // Append removal list
-            if DAAM.remove.length >= vote {                      // If votes is 3 or greater
+            DAAM_V1.remove.insert(key: self.grantee, admin) // Append removal list
+            if DAAM_V1.remove.length >= vote {                      // If votes is 3 or greater
                 var counter: {Address: Int} = {} // {To Remove : Total Votes}
                 // Talley Votes
-                for a in DAAM.remove.keys {
-                    let remove = DAAM.remove[a]! // get To Remove
+                for a in DAAM_V1.remove.keys {
+                    let remove = DAAM_V1.remove[a]! // get To Remove
                     // increment counter
                     if counter[remove] == nil {
                         counter.insert(key: remove, 1 as Int)
@@ -899,8 +899,8 @@ pub resource Admin: Agent
                 // Remove all with a vote of 3 or greater
                 for c in counter.keys {
                     if counter[c]! >= vote {        // Does To Remove have enough votes to be removed
-                        DAAM.remove = {}           // Reset DAAM.Remove
-                        DAAM.admins.remove(key: c) // Remove selected Admin
+                        DAAM_V1.remove = {}           // Reset DAAM_V1.Remove
+                        DAAM_V1.admins.remove(key: c) // Remove selected Admin
                         log("Removed Admin")
                         emit AdminRemoved(admin: admin)
                     }
@@ -910,48 +910,48 @@ pub resource Admin: Agent
 
         pub fun removeAgent(agent: Address) { // Admin removes selected Agent by Address
             pre  {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status                    : "You're no longer a have Access."
-                DAAM.agents.containsKey(agent) : "This is not a Agent Address."
+                DAAM_V1.agents.containsKey(agent) : "This is not a Agent Address."
             }
             post {
                 !DAAM.admins.containsKey(agent) : "Illegal operation: removeAgent"
                 !DAAM.agents.containsKey(agent) : "Illegal operation: removeAgent"
             } // Unreachable
 
-            DAAM.admins.remove(key: agent)    // Remove Agent from list
-            DAAM.agents.remove(key: agent)    // Remove Agent from list
+            DAAM_V1.admins.remove(key: agent)    // Remove Agent from list
+            DAAM_V1.agents.remove(key: agent)    // Remove Agent from list
             log("Removed Agent")
             emit AgentRemoved(agent: agent)
         }
 
         pub fun removeCreator(creator: Address) { // Admin removes selected Creator by Address
             pre {  
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status                        : "You're no longer a have Access."
-                DAAM.creators.containsKey(creator) : "This is not a Creator address."
-                DAAM.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
-                DAAM.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
+                DAAM_V1.creators.containsKey(creator) : "This is not a Creator address."
+                DAAM_V1.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
+                DAAM_V1.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
             }
             post { !DAAM.creators.containsKey(creator) : "Illegal operation: removeCreator" } // Unreachable
 
-            DAAM.creators.remove(key: creator)    // Remove Creator from list
-            DAAM.metadataCap.remove(key: creator) // Remove Metadata Capability from list
+            DAAM_V1.creators.remove(key: creator)    // Remove Creator from list
+            DAAM_V1.metadataCap.remove(key: creator) // Remove Metadata Capability from list
             log("Removed Creator")
             emit CreatorRemoved(creator: creator)
         }
 
         pub fun removeMinter(minter: Address) { // Admin removes selected Agent by Address
             pre {
-                DAAM.isAdmin(self.owner!.address) == true  : "Permission Denied"
+                DAAM_V1.isAdmin(self.owner!.address) == true  : "Permission Denied"
                 self.grantee == self.owner!.address        : "Permission Denied"
                 self.status                      : "You're no longer a have Access."
-                DAAM.isMinter(minter) != nil     : "This is not a Minter Address."
+                DAAM_V1.isMinter(minter) != nil     : "This is not a Minter Address."
             }
             post { !DAAM.minters.containsKey(minter) : "Illegal operation: removeAgent" } // Unreachable
-            DAAM.minters.remove(key: minter)    // Remove Agent from list
+            DAAM_V1.minters.remove(key: minter)    // Remove Agent from list
             log("Removed Minter")
             emit MinterRemoved(minter: minter)
         }
@@ -959,15 +959,15 @@ pub resource Admin: Agent
         // Admin can Change Agent status 
         pub fun changeAgentStatus(agent: Address, status: Bool) {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status                     : "You're no longer a have Access."
-                DAAM.agents.containsKey(agent)  : "Wrong Address. This is not an Agent."
-                DAAM.agents[agent] != status    : "Agent already has this Status."
+                DAAM_V1.agents.containsKey(agent)  : "Wrong Address. This is not an Agent."
+                DAAM_V1.agents[agent] != status    : "Agent already has this Status."
             }
-            post { DAAM.agents[agent] == status : "Illegal Operation: changeCreatorStatus" } // Unreachable
+            post { DAAM_V1.agents[agent] == status : "Illegal Operation: changeCreatorStatus" } // Unreachable
 
-            DAAM.agents[agent] = status // status changed
+            DAAM_V1.agents[agent] = status // status changed
             log("Agent Status Changed")
             emit ChangeAgentStatus(agent: agent, status: status)
         }        
@@ -975,17 +975,17 @@ pub resource Admin: Agent
         // Admin or Agent can Change Creator status 
         pub fun changeCreatorStatus(creator: Address, status: Bool) {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status                         : "You're no longer a have Access."
-                DAAM.creators.containsKey(creator)  : "Wrong Address. This is not a Creator."
-                DAAM.isCreator(creator) != status    : "Agent already has this Status."
-                DAAM.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
-                DAAM.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
+                DAAM_V1.creators.containsKey(creator)  : "Wrong Address. This is not a Creator."
+                DAAM_V1.isCreator(creator) != status    : "Agent already has this Status."
+                DAAM_V1.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
+                DAAM_V1.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
             }
-            post { DAAM.isCreator(creator) == status : "Illegal Operation: changeCreatorStatus" } // Unreachable
+            post { DAAM_V1.isCreator(creator) == status : "Illegal Operation: changeCreatorStatus" } // Unreachable
 
-            DAAM.creators[creator]!.setStatus(status) // status changed
+            DAAM_V1.creators[creator]!.setStatus(status) // status changed
             log("Creator Status Changed")
             emit ChangeCreatorStatus(creator: creator, status: status)
         }
@@ -993,15 +993,15 @@ pub resource Admin: Agent
         // Admin can Change Minter status 
         pub fun changeMinterStatus(minter: Address, status: Bool) {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status                       : "You're no longer a have Access."
-                DAAM.minters.containsKey(minter)  : "Wrong Address. This is not a Minter."
-                DAAM.minters[minter] != status    : "Minter already has this Status."
+                DAAM_V1.minters.containsKey(minter)  : "Wrong Address. This is not a Minter."
+                DAAM_V1.minters[minter] != status    : "Minter already has this Status."
             }
-            post { DAAM.minters[minter] == status : "Illegal Operation: changeCreatorStatus" } // Unreachable
+            post { DAAM_V1.minters[minter] == status : "Illegal Operation: changeCreatorStatus" } // Unreachable
 
-            DAAM.minters[minter] = status // status changed
+            DAAM_V1.minters[minter] = status // status changed
             log("Minter Status Changed")
             emit ChangeMinterStatus(minter: minter, status: status)
         }
@@ -1009,41 +1009,41 @@ pub resource Admin: Agent
         // Admin or Agent can change a Metadata status.
         pub fun changeMetadataStatus(creator: Address, mid: UInt64, status: Bool) {
             pre {
-                mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
-                DAAM.admins[self.owner!.address] == true : "Permission Denied"
+                mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
+                DAAM_V1.admins[self.owner!.address] == true : "Permission Denied"
                 self.grantee == self.owner!.address  : "Permission Denied"
                 self.status                          : "You're no longer a have Access."
-                DAAM.copyright.containsKey(mid)      : "This is an Invalid MID"
-                DAAM.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
-                DAAM.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
-                DAAM.creatorHistory[creator]!.contains(mid) : "This Creator does not have this MID"
+                DAAM_V1.copyright.containsKey(mid)      : "This is an Invalid MID"
+                DAAM_V1.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
+                DAAM_V1.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
+                DAAM_V1.creatorHistory[creator]!.contains(mid) : "This Creator does not have this MID"
             }            
                 
-            DAAM.metadata[mid] = status // change to a new Metadata status
+            DAAM_V1.metadata[mid] = status // change to a new Metadata status
         }      
 
         // Admin or Agent can change a MIDs copyright status.
         pub fun changeCopyright(creator: Address, mid: UInt64, copyright: CopyrightStatus) {
             pre {
-                mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address : "Permission Denied"
                 self.status                          : "You're no longer a have Access."
-                DAAM.copyright.containsKey(mid)      : "This is an Invalid MID"
-                DAAM.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
-                DAAM.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
-                DAAM.creatorHistory[creator]!.contains(mid) : "This Creator does not have this MID"
+                DAAM_V1.copyright.containsKey(mid)      : "This is an Invalid MID"
+                DAAM_V1.isAgent(self.owner!.address) == nil || // Verify Agent or Admin
+                DAAM_V1.agentHistory[self.owner!.address]!.contains(creator) : "Access Denied!"
+                DAAM_V1.creatorHistory[creator]!.contains(mid) : "This Creator does not have this MID"
             }
-            post { DAAM.copyright[mid] == copyright  : "Illegal Operation: changeCopyright" } // Unreachable
+            post { DAAM_V1.copyright[mid] == copyright  : "Illegal Operation: changeCopyright" } // Unreachable
 
-            DAAM.copyright[mid] = copyright    // Change to new copyright
+            DAAM_V1.copyright[mid] = copyright    // Change to new copyright
             log("MID: ".concat(mid.toString()) )
             emit ChangedCopyright(metadataID: mid)            
         }
 
         pub fun addCategory(name: String) {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address       : "Permission Denied"
                 self.status                               : "You're no longer a have Access."
             }
@@ -1052,7 +1052,7 @@ pub resource Admin: Agent
 
         pub fun removeCategory(name: String) {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address       : "Permission Denied"
                 self.status                               : "You're no longer a have Access."
             }
@@ -1062,20 +1062,20 @@ pub resource Admin: Agent
         pub fun createMetadata(creator: Address, name: String, max: UInt64?, categories: [Categories.Category], description: String,
             misc: String, thumbnail: {String:{MetadataViews.File}}, file: {String:MetadataViews.Media}, interact: AnyStruct?): @Metadata {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address       : "Permission Denied"
                 self.status                               : "You're no longer a have Access."
-                DAAM.getAgentCreators(agent: self.owner!.address)!.contains(creator)   : "This is not your Creator."
+                DAAM_V1.getAgentCreators(agent: self.owner!.address)!.contains(creator)   : "This is not your Creator."
             }
-            let metadata <- create Metadata(creator: DAAM.creators[creator], name: name, max: max, categories: categories,
+            let metadata <- create Metadata(creator: DAAM_V1.creators[creator], name: name, max: max, categories: categories,
                 description: description, misc: misc, thumbnail: thumbnail, interact: interact, file: file, metadata: nil) // Create Metadata
             let mid = metadata.mid
 
             // copy of MetadataGenerator.saveMID function below
-            DAAM.metadata.insert(key: mid, false)   // a metadata ID for Admin approval, currently unapproved (false)
-            DAAM.copyright.insert(key: mid, CopyrightStatus.UNVERIFIED) // default copyright setting
+            DAAM_V1.metadata.insert(key: mid, false)   // a metadata ID for Admin approval, currently unapproved (false)
+            DAAM_V1.copyright.insert(key: mid, CopyrightStatus.UNVERIFIED) // default copyright setting
 
-            DAAM.metadata[mid] = true // TODO REMOVE AUTO-APPROVE AFTER DEVELOPMENT
+            DAAM_V1.metadata[mid] = true // TODO REMOVE AUTO-APPROVE AFTER DEVELOPMENT
 
             log("Metadata Generatated ID: ".concat(mid.toString()) )
             emit AddMetadata(creator: self.grantee, mid: mid)
@@ -1086,11 +1086,11 @@ pub resource Admin: Agent
         
         pub fun bargin(creator: Address, mid: UInt64, percentage: UFix64) {
             pre {
-                DAAM.admins[self.owner!.address] == true  : "Permission Denied"
+                DAAM_V1.admins[self.owner!.address] == true  : "Permission Denied"
                 self.grantee == self.owner!.address       : "Permission Denied"
                 self.status                               : "You're no longer a have Access."
                 !DAAM.getRequestValidity(mid: mid) : "Request already is settled."
-                DAAM.getAgentCreators(agent: self.owner!.address)!.contains(creator): "This is not your Creator."
+                DAAM_V1.getAgentCreators(agent: self.owner!.address)!.contains(creator): "This is not your Creator."
             }
             let ref = &DAAMDAAM_V1.request[mid] as &Request?
 
@@ -1100,9 +1100,9 @@ pub resource Admin: Agent
             description: "Creator Royalty" )
             ]
             let royalty = MetadataViews.Royalties(royalties)
-            let request <- DAAM.request.remove(key: mid)!
+            let request <- DAAM_V1.request.remove(key: mid)!
             request.bargin(isCreator: false, mid: mid, royalty: royalty)
-            let old <- DAAM.request[mid] <- request
+            let old <- DAAM_V1.request[mid] <- request
             destroy old
         }
 	}
@@ -1136,8 +1136,8 @@ pub struct CreatorInfo {
         pub fun newMetadataGenerator(): @MetadataGenerator {
             pre{
                 self.grantee == self.owner!.address : "Permission Denied"
-                DAAM.creators.containsKey(self.grantee) : "You're not a Creator."
-                DAAM.isCreator(self.grantee) == true    : "Your Creator account is Frozen."
+                DAAM_V1.creators.containsKey(self.grantee) : "You're not a Creator."
+                DAAM_V1.isCreator(self.grantee) == true    : "Your Creator account is Frozen."
             }
             return <- create MetadataGenerator(self.grantee) // return Metadata Generator
         }
@@ -1146,8 +1146,8 @@ pub struct CreatorInfo {
         pub fun newRequestGenerator(): @RequestGenerator {
             pre{
                 self.grantee == self.owner!.address : "Permission Denied"
-                DAAM.creators.containsKey(self.grantee) : "You're not a Creator."
-                DAAM.isCreator(self.grantee) == true    : "Your Creator account is Frozen."
+                DAAM_V1.creators.containsKey(self.grantee) : "You're not a Creator."
+                DAAM_V1.isCreator(self.grantee) == true    : "Your Creator account is Frozen."
             }
             return <- create RequestGenerator(self.grantee) // return Request Generator
         }
@@ -1156,8 +1156,8 @@ pub struct CreatorInfo {
         // Verify is Creator
         pre {
             self.grantee == self.owner!.address : "Permission Denied"
-            DAAM.creators.containsKey(self.grantee) : "You're not a Creator."
-            DAAM.isCreator(self.grantee) == true    : "Your Creator account is Frozen."
+            DAAM_V1.creators.containsKey(self.grantee) : "You're not a Creator."
+            DAAM_V1.isCreator(self.grantee) == true    : "Your Creator account is Frozen."
 
             !DAAM.getRequestValidity(mid: mid) : "Request already is settled."
         }
@@ -1169,9 +1169,9 @@ pub struct CreatorInfo {
                 ]
             let royalty = MetadataViews.Royalties(royalties)
 
-            let request <- DAAM.request.remove(key: mid)!
+            let request <- DAAM_V1.request.remove(key: mid)!
             request.bargin(isCreator: true, mid: mid, royalty: royalty)
-            let old <- DAAM.request[mid] <- request
+            let old <- DAAM_V1.request[mid] <- request
             destroy old
         }
     }
@@ -1184,15 +1184,15 @@ pub struct CreatorInfo {
 
         init(_ minter: Address) {
             self.grantee = minter
-            DAAM.minters.insert(key: minter, true) // Insert new Minter in minter list.
+            DAAM_V1.minters.insert(key: minter, true) // Insert new Minter in minter list.
         }
 
         pub fun mintNFT(metadata: @Metadata): @DAAM.NFT {
             pre{
-                DAAM.isCreator(metadata.creatorInfo.creator) == true :
+                DAAM_V1.isCreator(metadata.creatorInfo.creator) == true :
                     "Account: ".concat(metadata.creatorInfo.creator.toString()).concat(" This is not our Creator.")
-                DAAM.isMinter(self.grantee) == true      : "Account: ".concat(self.grantee.toString()).concat(" Your Creator account is Frozen.")
-                DAAM.request.containsKey(metadata.mid)   : "Invalid Request for MID: ".concat(metadata.mid.toString())
+                DAAM_V1.isMinter(self.grantee) == true      : "Account: ".concat(self.grantee.toString()).concat(" Your Creator account is Frozen.")
+                DAAM_V1.request.containsKey(metadata.mid)   : "Invalid Request for MID: ".concat(metadata.mid.toString())
             }
             var isLast = false
             if metadata.edition.max != nil { 
@@ -1204,7 +1204,7 @@ pub struct CreatorInfo {
 
             // Update Request, if last remove.
             if isLast {
-                let request <- DAAM.request.remove(key: mid)! // Get Request using MID
+                let request <- DAAM_V1.request.remove(key: mid)! // Get Request using MID
                 destroy request       // if last destroy request, Request not needed. Counter has reached limit.
             } 
             self.newNFT(id: nft.id) // Mark NFT as new
@@ -1223,14 +1223,14 @@ pub struct CreatorInfo {
         pub fun notNew(tokenID: UInt64) {
             pre  {
                 self.grantee == self.owner!.address : "Permission Denied"
-                DAAM.newNFTs.contains(tokenID)      : "Token ID: ".concat(tokenID.toString()).concat(" is Not New.")
+                DAAM_V1.newNFTs.contains(tokenID)      : "Token ID: ".concat(tokenID.toString()).concat(" is Not New.")
             }
             post { !DAAM.newNFTs.contains(tokenID) : "Illegal Operation: notNew" } // Unreachable
 
             var counter: UInt64 = 0 as UInt64              // start the conter
-            for nft in DAAM.newNFTs {              // cycle through 'new' list
+            for nft in DAAM_V1.newNFTs {              // cycle through 'new' list
                 if nft == tokenID {                // if Token ID is found
-                    DAAM.newNFTs.remove(at: counter) // remove from 'new' list
+                    DAAM_V1.newNFTs.remove(at: counter) // remove from 'new' list
                     break
                 } else {
                     counter = counter + 1          // increment counter
@@ -1241,8 +1241,8 @@ pub struct CreatorInfo {
         // Add NFT to 'new' list
         priv fun newNFT(id: UInt64) {
             pre  { !DAAM.newNFTs.contains(id) : "Token ID: ".concat(id.toString()).concat(" is already set to New.") }
-            post { DAAM.newNFTs.contains(id)  : "Illegal Operation: newNFT" }
-                DAAM.newNFTs.append(id)       // Append 'new' list
+            post { DAAM_V1.newNFTs.contains(id)  : "Illegal Operation: newNFT" }
+                DAAM_V1.newNFTs.append(id)       // Append 'new' list
         }        
     }
 
@@ -1259,23 +1259,23 @@ pub resource MinterAccess
 
     pub fun validate(creator: Address): Bool {
         pre {
-            DAAM.isMinter(self.minter) == true : "You access has been denied."
-            DAAM.isCreator(creator)    == true : creator.toString().concat(" is not a Creator or account is Frozen.")     
+            DAAM_V1.isMinter(self.minter) == true : "You access has been denied."
+            DAAM_V1.isCreator(creator)    == true : creator.toString().concat(" is not a Creator or account is Frozen.")     
         }
 
-        if DAAM.isAgent(self.minter) == nil   { return true  } // Is a Marketplace, Access Approvd, minterStatus is always true
-        if DAAM.isAgent(self.minter) == false { return false } // Access is Frozen or Invitation has not been acccepted.
-        if DAAM.isAgent(self.minter) == true  {  // is an Agent, verify creator & mid relationship to agent
+        if DAAM_V1.isAgent(self.minter) == nil   { return true  } // Is a Marketplace, Access Approvd, minterStatus is always true
+        if DAAM_V1.isAgent(self.minter) == false { return false } // Access is Frozen or Invitation has not been acccepted.
+        if DAAM_V1.isAgent(self.minter) == true  {  // is an Agent, verify creator & mid relationship to agent
                 // Verify MID belongs to Creator && Verify Agent is Creators'
-                let valid_mid = DAAM.getCreatorMIDs(creator: creator)!.contains(self.mid)
-        		let is_creators_agent = DAAM.agentHistory[self.minter]!.contains(creator)
+                let valid_mid = DAAM_V1.getCreatorMIDs(creator: creator)!.contains(self.mid)
+        		let is_creators_agent = DAAM_V1.agentHistory[self.minter]!.contains(creator)
                 return valid_mid && is_creators_agent
         }
         return false
     }
 }
 /************************************************************************/
-    // Public DAAM functions
+    // Public DAAM_V1 functions
 
     // answerInvitation Functions:
     // True : invitation is accepted and invitation setting reset
@@ -1286,19 +1286,19 @@ pub resource MinterAccess
         pre {
             self.isAgent(newAdmin.address)   == nil : "Account: ".concat(newAdmin.address.toString()).concat(" A Admin can not use the same address as an Agent.")
             self.isCreator(newAdmin.address) == nil : "Account: ".concat(newAdmin.address.toString()).concat(" A Admin can not use the same address as an Creator.")
-            self.isAdmin(newAdmin.address) == false : "Account: ".concat(newAdmin.address.toString()).concat(" You got no DAAM Admin invite.")
-            DAAM_Profile.check(newAdmin.address)  : "You can't be a DAAM Admin without a DAAM Profile first. Go make a DAAM Profile first."
+            self.isAdmin(newAdmin.address) == false : "Account: ".concat(newAdmin.address.toString()).concat(" You got no DAAM_V1 Admin invite.")
+            DAAM_Profile.check(newAdmin.address)  : "You can't be a DAAM_V1 Admin without a DAAM_V1 Profile first. Go make a DAAM_V1 Profile first."
         }
         let newAdminAddress:Address = newAdmin.address
 
         if !submit { 
-            DAAM.admins.remove(key: newAdminAddress) // Release Admin
+            DAAM_V1.admins.remove(key: newAdminAddress) // Release Admin
             return nil
         }  // Refused invitation. Return and end function
         
         // Invitation accepted at this point
-        DAAM.admins[newAdminAddress] = submit // Insert new Admin in admins list.
-        log("Admin: ".concat(newAdminAddress.toString()).concat(" added to DAAM") )
+        DAAM_V1.admins[newAdminAddress] = submit // Insert new Admin in admins list.
+        log("Admin: ".concat(newAdminAddress.toString()).concat(" added to DAAM_V1") )
         emit NewAdmin(admin: newAdminAddress)
         return <- create Admin(newAdminAddress)      // Accepted and returning Admin Resource
     }
@@ -1309,23 +1309,23 @@ pub resource MinterAccess
         pre {
             self.isAdmin(newAgent.address)   == nil   : "Account: ".concat(newAgent.address.toString()).concat(" An Agent can not use the same address as an Admin.")
             self.isCreator(newAgent.address) == nil   : "Account: ".concat(newAgent.address.toString()).concat("A Agent can not use the same address as an Creator.")
-            self.isAgent(newAgent.address)   == false : "Account: ".concat(newAgent.address.toString()).concat(" You got no DAAM Agent invite.")
-            DAAM_Profile.check(newAgent.address) : "You can't be a DAAM Agent without a DAAM Profile first. Go make a DAAM Profile first."
+            self.isAgent(newAgent.address)   == false : "Account: ".concat(newAgent.address.toString()).concat(" You got no DAAM_V1 Agent invite.")
+            DAAM_Profile.check(newAgent.address) : "You can't be a DAAM_V1 Agent without a DAAM_V1 Profile first. Go make a DAAM_V1 Profile first."
         }
         let newAgentAddress:Address = newAgent.address
 
         if !submit {                                  // Refused invitation. 
-            DAAM.admins.remove(key: newAgentAddress) // Remove potential from Agent list
-            DAAM.agents.remove(key: newAgentAddress) // Remove potential from Agent list
+            DAAM_V1.admins.remove(key: newAgentAddress) // Remove potential from Agent list
+            DAAM_V1.agents.remove(key: newAgentAddress) // Remove potential from Agent list
             return nil                                // Return and end function
         }
         // Invitation accepted at this point
-        DAAM.admins[newAgentAddress] = submit        // Add Admin & set Status (True)
-        DAAM.agents[newAgentAddress] = submit        // Add Agent & set Status (True)
-        DAAM.agentHistory[newAgentAddress] = []     // Setup Agent History
+        DAAM_V1.admins[newAgentAddress] = submit        // Add Admin & set Status (True)
+        DAAM_V1.agents[newAgentAddress] = submit        // Add Agent & set Status (True)
+        DAAM_V1.agentHistory[newAgentAddress] = []     // Setup Agent History
 
 
-        log("Agent: ".concat(newAgentAddress.toString()).concat(" added to DAAM") )
+        log("Agent: ".concat(newAgentAddress.toString()).concat(" added to DAAM_V1") )
         emit NewAgent(agent: newAgentAddress)
         return <- create Admin(newAgentAddress)!             // Return Admin Resource as {Agent}
     }
@@ -1335,29 +1335,29 @@ pub resource MinterAccess
         pre {
             self.isAdmin(newCreator.address) == nil : "Account: ".concat(newCreator.address.toString()).concat(" A Creator can not use the same address as an Admin.")
             self.isAgent(newCreator.address) == nil : "Account: ".concat(newCreator.address.toString()).concat(" A Creator can not use the same address as an Agent.")
-            self.isCreator(newCreator.address) == false : "Account: ".concat(newCreator.address.toString()).concat(" You got no DAAM Creator invite.")
-            DAAM_Profile.check(newCreator.address)  : "You can't be a DAAM Creator without a DAAM Profile first. Go make a DAAM Profile first."
+            self.isCreator(newCreator.address) == false : "Account: ".concat(newCreator.address.toString()).concat(" You got no DAAM_V1 Creator invite.")
+            DAAM_Profile.check(newCreator.address)  : "You can't be a DAAM_V1 Creator without a DAAM_V1 Profile first. Go make a DAAM_V1 Profile first."
         }
         let newCreatorAddress:Address = newCreator.address
 
         if !submit {                                       // Refused invitation.
-            DAAM.creators.remove(key: newCreatorAddress)  // Remove potential from Agent list
+            DAAM_V1.creators.remove(key: newCreatorAddress)  // Remove potential from Agent list
             return nil                                     // Return and end function
         }
         // Invitation accepted at this point
-        DAAM.creators[newCreatorAddress]!.setStatus(submit) // Add Creator & set Status (True)
+        DAAM_V1.creators[newCreatorAddress]!.setStatus(submit) // Add Creator & set Status (True)
 
-        let agent = DAAM.creators[newCreatorAddress]!.agent
+        let agent = DAAM_V1.creators[newCreatorAddress]!.agent
         log("Agent: ".concat(agent.toString()) )
         
         // Update agent History with Creator Address
-        if DAAM.agentHistory[agent] == nil {
-            DAAM.agentHistory[agent] = [newCreatorAddress]
+        if DAAM_V1.agentHistory[agent] == nil {
+            DAAM_V1.agentHistory[agent] = [newCreatorAddress]
         } else if !DAAM.agentHistory[agent]!.contains(newCreatorAddress) {
-            DAAM.agentHistory[agent]!.append(newCreatorAddress)
+            DAAM_V1.agentHistory[agent]!.append(newCreatorAddress)
         }
 
-        log("Creator: ".concat(newCreatorAddress.toString()).concat(" added to DAAM") )
+        log("Creator: ".concat(newCreatorAddress.toString()).concat(" added to DAAM_V1") )
         emit NewCreator(creator: newCreatorAddress)
         return <- create Creator(newCreatorAddress)!                         // Return Creator Resource
     }
@@ -1367,7 +1367,7 @@ pub resource MinterAccess
 
         let newMinterAddress: Address = newMinter.address
         if !submit {                                      // Refused invitation. 
-            DAAM.minters.remove(key: newMinterAddress) // Remove potential from Agent list
+            DAAM_V1.minters.remove(key: newMinterAddress) // Remove potential from Agent list
             return nil                                    // Return and end function
         }
         // Invitation accepted at this point
@@ -1379,7 +1379,7 @@ pub resource MinterAccess
     // Create an new Collection to store NFTs
     pub fun createEmptyCollection(): @NonFungibleToken.Collection {
         post { result.getIDs().length == 0: "The created collection must be empty!" }
-        return <- create DAAM.Collection() // Return Collection Resource
+        return <- create DAAM_V1.Collection() // Return Collection Resource
     }
 
     // Return list of Agents
@@ -1415,14 +1415,14 @@ pub resource MinterAccess
 
     // Return Copyright Status. nil = non-existent MID
     pub fun getCopyright(mid: UInt64): CopyrightStatus? {
-        pre { mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate" }
+        pre { mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate" }
         return self.copyright[mid]
     }
 
     pub fun getRoyalties(mid: UInt64): MetadataViews.Royalties {
         pre {
-            mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
-            DAAM.request.containsKey(mid) : "Invalid MID"
+            mid !=0 && mid <= DAAM_V1.metadataCounterID : "Illegal Operation: validate"
+            DAAM_V1.request.containsKey(mid) : "Invalid MID"
         }
         let request = &DAAMDAAM_V1.request[mid] as &Request?
         let royalty = request!.royalty!
@@ -1457,7 +1457,7 @@ pub resource MinterAccess
     }
 
     pub fun isCreator(_ creator: Address): Bool? { // Returns Creator status
-        return DAAM.creators[creator]?.status // nil = not a creator, false = invited to be a creator, true = is a creator
+        return DAAM_V1.creators[creator]?.status // nil = not a creator, false = invited to be a creator, true = is a creator
     }
 
     priv fun validInteract(_ interact: AnyStruct?): Bool {
@@ -1470,7 +1470,7 @@ pub resource MinterAccess
             return false
     } 
 /************************************************************************/
-// Init DAAM Contract variables
+// Init DAAM_V1 Contract variables
     
     init(founders: {Address:UFix64}, company: Address, defaultAdmins: [Address])
     {

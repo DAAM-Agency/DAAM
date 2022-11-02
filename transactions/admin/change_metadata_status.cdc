@@ -1,7 +1,7 @@
 // change_metadata_status.cdc
 // Used for Admin / Agents to Approve/Disapprove Metadata via MID. True = Approved, False = Disapproved
 
-import DAAM from 0x7db4d10c78bad30a
+import DAAM_V1 from 0x7db4d10c78bad30a
 
 transaction(creator: Address, mid: UInt64, status: Bool)
 {
@@ -11,7 +11,7 @@ transaction(creator: Address, mid: UInt64, status: Bool)
     let creator: Address
 
     prepare(agent: AuthAccount) {
-        self.admin   = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+        self.admin   = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM_V1.adminStoragePath)!
         self.mid     = mid
         self.status  = status
         self.creator = creator

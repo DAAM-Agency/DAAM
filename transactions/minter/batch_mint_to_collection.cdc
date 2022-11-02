@@ -3,7 +3,7 @@
 
 //import NonFungibleToken from 0x1d7e57aa55817448
 import MetadataViews    from 0x1d7e57aa55817448
-import DAAM             from 0x7db4d10c78bad30a
+import DAAM_V1             from 0x7db4d10c78bad30a
 
 pub fun compareArray(_ mids: [UInt64], _ features: [UInt64]) {
     for f in features {
@@ -23,7 +23,7 @@ transaction(creator: Address, mid: [UInt64], name: String, feature: [UInt64])
 
     prepare(minter: AuthAccount) {
         compareArray(mid, feature)
-        self.minterRef = minter.borrow<&DAAMDAAM_V1.Minter>(from: DAAM.minterStoragePath)!
+        self.minterRef = minter.borrow<&DAAMDAAM_V1.Minter>(from: DAAM_V1.minterStoragePath)!
         self.mid       = mid
         self.feature   = feature
 
@@ -35,7 +35,7 @@ transaction(creator: Address, mid: [UInt64], name: String, feature: [UInt64])
             .getCapability(DAAM.metadataPublicPath)
             .borrow<&{DAAM.MetadataGeneratorMint}>()!
         
-        self.agentRef = minter.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+        self.agentRef = minter.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM_V1.adminStoragePath)!
 
         self.name = name
     }

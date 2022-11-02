@@ -1,7 +1,7 @@
 // transfer.cdc
 
 import NonFungibleToken from 0x1d7e57aa55817448
-import DAAM from 0x7db4d10c78bad30a
+import DAAM_V1 from 0x7db4d10c78bad30a
 
 /// This transaction is for transferring and NFT from
 /// one account to another
@@ -14,7 +14,7 @@ transaction(burn: UInt64) {
     prepare(signer: AuthAccount) {
         // borrow a reference to the signer's NFT collection
         self.withdrawRef = signer
-            .borrow<&DAAMDAAM_V1.Collection>(from: DAAM.collectionStoragePath)
+            .borrow<&DAAMDAAM_V1.Collection>(from: DAAM_V1.collectionStoragePath)
             ?? panic("Account does not store an object at the specified path")
 
         self.tokenID = burn

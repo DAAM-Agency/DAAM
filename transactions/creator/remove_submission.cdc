@@ -2,7 +2,7 @@
 // Creator can remove Metadata submission
 
 import NonFungibleToken from 0x1d7e57aa55817448
-import DAAM             from 0x7db4d10c78bad30a
+import DAAM_V1             from 0x7db4d10c78bad30a
 
 transaction(mid: UInt64)
 {    
@@ -12,7 +12,7 @@ transaction(mid: UInt64)
 
     prepare(creator: AuthAccount) {
         self.creator = creator
-        self.metadataGen = self.creator.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM.metadataStoragePath)!
+        self.metadataGen = self.creator.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM_V1.metadataStoragePath)!
         self.mid = mid
     }
 

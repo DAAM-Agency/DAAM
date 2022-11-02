@@ -2,7 +2,7 @@
 // Used for Agent deposit Auction for Creator Approval/Disapproval
 
 import NonFungibleToken from 0x1d7e57aa55817448
-import DAAM             from 0x7db4d10c78bad30a
+import DAAM_V1             from 0x7db4d10c78bad30a
 import FUSD             from 0x509abbf4f85f3d73
 import AuctionHouse     from 0x045a1763c93006ca
 
@@ -25,7 +25,7 @@ transaction(creator: Address, mid: UInt64, start: UFix64, length: UFix64, isExte
     let reprintSeries   : UInt64?
 
     prepare(agent: AuthAccount) {
-        self.agent = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+        self.agent = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM_V1.adminStoragePath)!
 
         self.metadataGenerator  = getAccount(creator)
             .getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>

@@ -3,7 +3,7 @@
 
 import Categories    from 0x7db4d10c78bad30a
 import MetadataViews from 0x1d7e57aa55817448
-import DAAM          from 0x7db4d10c78bad30a
+import DAAM_V1          from 0x7db4d10c78bad30a
 
 // argument have two modes:
 // when ipfs = true; first arument is cid, second argument is path 
@@ -13,7 +13,7 @@ pub fun setFile(ipfs: Bool, string_cid: String, type_path: String?): {MetadataVi
     if ipfs { return MetadataViews.IPFSFile(cid: string_cid, path: type_path) }
     switch type_path! {
         case "http": return MetadataViews.HTTPFile(url: string_cid)
-        default: return DAAM.OnChain(file: string_cid)
+        default: return DAAM_V1.OnChain(file: string_cid)
     }
 }
 
@@ -23,7 +23,7 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
     interact: AnyStruct?)
 {    
     let creator     : Address   
-    let metadataGen : &DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}
+    let metadataGen : &DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM_V1.MetadataGeneratorPublic}
     let agent       : &DAAMDAAM_V1.Admin{DAAM.Agent}
 
     let name        : String
@@ -38,8 +38,8 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
     prepare(agent: AuthAccount) {
         self.creator      = creator
         self.metadataGen  = getAccount(self.creator)
-            .getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}>(DAAM.metadataPublicPath).borrow()!
-        self.agent        = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+            .getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM_V1.MetadataGeneratorPublic}>(DAAM.metadataPublicPath).borrow()!
+        self.agent        = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM_V1.adminStoragePath)!
         self.name         = name
         self.max          = max
         self.description  = description

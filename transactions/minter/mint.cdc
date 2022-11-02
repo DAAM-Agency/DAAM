@@ -3,7 +3,7 @@
 
 import NonFungibleToken from 0x1d7e57aa55817448
 import MetadataViews    from 0x1d7e57aa55817448
-import DAAM             from 0x7db4d10c78bad30a
+import DAAM_V1             from 0x7db4d10c78bad30a
 
 transaction(creator: Address, mid: UInt64)
 {
@@ -13,7 +13,7 @@ transaction(creator: Address, mid: UInt64)
     let receiverRef : &{NonFungibleToken.CollectionPublic}
 
     prepare(minter: AuthAccount) {
-        self.minterRef = minter.borrow<&DAAMDAAM_V1.Minter>(from: DAAM.minterStoragePath)!
+        self.minterRef = minter.borrow<&DAAMDAAM_V1.Minter>(from: DAAM_V1.minterStoragePath)!
         self.mid       = mid
 
         self.receiverRef  = getAccount(creator)

@@ -1,6 +1,6 @@
 // add_tokenID_to_collection.cdc
 
-import DAAM from 0x7db4d10c78bad30a
+import DAAM_V1 from 0x7db4d10c78bad30a
 
 transaction(id: UInt64, feature: Bool, name: String) {
     let collectionRef : &DAAMDAAM_V1.Collection
@@ -10,7 +10,7 @@ transaction(id: UInt64, feature: Bool, name: String) {
 
     prepare(acct: AuthAccount) {
         // Borrow a reference from the stored collection
-        self.collectionRef = acct.borrow<&DAAMDAAM_V1.Collection>(from: DAAM.collectionStoragePath)
+        self.collectionRef = acct.borrow<&DAAMDAAM_V1.Collection>(from: DAAM_V1.collectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
         self.id      = id
         self.feature = feature
