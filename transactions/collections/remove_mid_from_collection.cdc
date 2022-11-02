@@ -1,16 +1,16 @@
 // remove_mid_from_collection.cdc
 
-import DAAM_V1 from 0x7db4d10c78bad30a
+import DAAM from 0x7db4d10c78bad30a
 
 transaction(mid: UInt64, name: String) {
-    let collectionRef : &DAAMDAAM_V1.Collection
-    let creatorRef    : &DAAMDAAM_V1.Creator
+    let collectionRef : &DAAM.Collection
+    let creatorRef    : &DAAM.Creator
     let mid           : UInt64
     let name          : String
 
     prepare(acct: AuthAccount) {
-        self.creatorRef    = acct.borrow<&DAAMDAAM_V1.Creator>(from: DAAM_V1.creatorStoragePath)! // Borrow a reference from the stored collection
-        self.collectionRef = acct.borrow<&DAAMDAAM_V1.Collection>(from: DAAM_V1.collectionStoragePath)
+        self.creatorRef    = acct.borrow<&DAAM.Creator>(from: DAAM.creatorStoragePath)! // Borrow a reference from the stored collection
+        self.collectionRef = acct.borrow<&DAAM.Collection>(from: DAAM.collectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
         self.mid  = mid
         self.name = name

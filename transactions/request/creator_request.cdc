@@ -2,13 +2,13 @@
 
 import FungibleToken from 0xf233dcee88fe0abe 
 import MetadataViews from 0x1d7e57aa55817448
-import DAAM_V1          from 0x7db4d10c78bad30a
+import DAAM          from 0x7db4d10c78bad30a
 
 transaction(mid: UInt64, percentage: UFix64 ) {
     let mid        : UInt64
     let royalty    : MetadataViews.Royalties
-    let requestGen : &DAAMDAAM_V1.RequestGenerator
-    let metadataGen: &DAAMDAAM_V1.MetadataGenerator
+    let requestGen : &DAAM.RequestGenerator
+    let metadataGen: &DAAM.MetadataGenerator
 
     prepare(signer: AuthAccount) {
         let royalties    = [ MetadataViews.Royalty(
@@ -19,8 +19,8 @@ transaction(mid: UInt64, percentage: UFix64 ) {
         self.royalty = MetadataViews.Royalties(royalties)
 
         self.mid         = mid
-        self.requestGen  = signer.borrow<&DAAMDAAM_V1.RequestGenerator>( from: DAAM_V1.requestStoragePath)!
-        self.metadataGen = signer.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM_V1.metadataStoragePath)!
+        self.requestGen  = signer.borrow<&DAAM.RequestGenerator>( from: DAAM.requestStoragePath)!
+        self.metadataGen = signer.borrow<&DAAM.MetadataGenerator>(from: DAAM.metadataStoragePath)!
     }
 
     execute {

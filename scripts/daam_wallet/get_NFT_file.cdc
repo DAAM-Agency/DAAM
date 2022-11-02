@@ -2,7 +2,7 @@
 // View the NFT file
 
 import MetadataViews from 0x1d7e57aa55817448
-import DAAM_V1          from 0x7db4d10c78bad30a
+import DAAM          from 0x7db4d10c78bad30a
 
 pub fun main(account: Address, tokenID: UInt64 ): {String: MetadataViews.Media}
 {

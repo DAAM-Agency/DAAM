@@ -2,7 +2,7 @@
 // Used to cancel an auction. There must have been be no bids made in order to cancel an auction.
 
 import AuctionHouse  from 0x045a1763c93006ca
-import DAAM_V1          from 0x7db4d10c78bad30a
+import DAAM          from 0x7db4d10c78bad30a
 
 transaction(aid: UInt64)
 {

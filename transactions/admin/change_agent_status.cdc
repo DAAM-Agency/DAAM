@@ -1,20 +1,20 @@
 // change_agent_status.cdc
 // Used for Admin to change Agent status. True = active, False = frozen
 
-import DAAM_V1 from 0x7db4d10c78bad30a
+import DAAM from 0x7db4d10c78bad30a
 
 transaction(agent: Address, status: Bool) {
-    let admin   : &DAAMDAAM_V1.Admin
+    let admin   : &DAAM.Admin
     let agent : Address
     let status  : Bool
 
     prepare(agent: AuthAccount) {
         self.agent = agent  
         self.status  = status
-        self.admin = agent.borrow<&DAAMDAAM_V1.Admin>(from: DAAM_V1.adminStoragePath)!
+        self.admin = agent.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath)!
     }
 
-    pre { DAAM_V1.isAgent(agent) != nil : agent.toString().concat(" is not a Agent.") }
+    pre { DAAM.isAgent(agent) != nil : agent.toString().concat(" is not a Agent.") }
 
     execute {
         self.admin.changeAgentStatus(agent: self.agent, status: self.status)

@@ -1,14 +1,14 @@
 // remove_collection.cdc 
 
-import DAAM_V1 from 0x7db4d10c78bad30a
+import DAAM from 0x7db4d10c78bad30a
 
 transaction(name: String) {
-    let collectionRef : &DAAMDAAM_V1.Collection
+    let collectionRef : &DAAM.Collection
     let name          : String 
 
     prepare(acct: AuthAccount) {
         // Borrow a reference from the stored collection
-        self.collectionRef = acct.borrow<&DAAMDAAM_V1.Collection>(from: DAAM_V1.collectionStoragePath)
+        self.collectionRef = acct.borrow<&DAAM.Collection>(from: DAAM.collectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
         self.name = name
     }
