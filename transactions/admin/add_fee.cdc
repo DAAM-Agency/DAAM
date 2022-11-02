@@ -8,12 +8,12 @@ transaction(mid: UInt64, fee: UFix64)
 {
     let mid: UInt64
     let fee: UFix64
-    let admin: &DAAM.Admin
+    let admin: &DAAMDAAM_V1.Admin
 
     prepare(admin: AuthAccount) {
         self.mid = mid
         self.fee = fee
-        self.admin = admin.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath)!
+        self.admin = admin.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath)!
     }
 
     execute {

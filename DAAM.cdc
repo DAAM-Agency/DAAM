@@ -588,7 +588,7 @@ pub struct OnChain: MetadataViews.File {
 /************************************************************************/
 // Wallet Public standards. For Public access only
 pub resource interface CollectionPublic {
-    pub fun borrowDAAM(id: UInt64): &DAAM.NFT // Get NFT as DAAM.NFT
+    pub fun borrowDAAM(id: UInt64): &DAAMDAAM_V1.NFT // Get NFT as DAAM.NFT
     pub fun getCollection(): {String: NFTCollectionDisplay{CollectionDisplay}}
     pub fun depositByAgent(token: @NonFungibleToken.NFT, name: String, feature: Bool, permission: &Admin{Agent})
 }
@@ -701,7 +701,7 @@ pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, N
                     publicPath: DAAM.collectionPublicPath,
                     providerPath: DAAM.collectionPrivatePath,
                     publicCollection: Type<@DAAM.Collection>(),
-                    publicLinkedType: Type<&DAAM.Collection{DAAM.CollectionPublic, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection, MetadataViews.Resolver}>(),
+                    publicLinkedType: Type<&DAAMDAAM_V1.Collection{DAAM.CollectionPublic, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection, MetadataViews.Resolver}>(),
                     providerLinkedType: ?????, // TODO  ???
                     createEmptyCollectionFunction: (DAAM.createEmptyCollection() : @DAAM.Collection) // TODO ???
                 )*/
@@ -716,7 +716,7 @@ pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, N
     pub fun borrowViewResolver(id: UInt64): &{MetadataViews.Resolver} {
         pre { self.ownedNFTs.containsKey(id) : "TokenID: ".concat(id.toString().concat(" is not in this collection.")) }
         let mRef = &self.ownedNFTs[id] as &NonFungibleToken.NFT?
-        return mRef as! &DAAM.NFT{MetadataViews.Resolver}
+        return mRef as! &DAAMDAAM_V1.NFT{MetadataViews.Resolver}
     }
 
     // withdraw removes an NFT from the collection and moves it to the caller
@@ -754,10 +754,10 @@ pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, N
     }
 
     // borrowDAAM gets a reference to an DAAM.NFT
-    pub fun borrowDAAM(id: UInt64): &DAAM.NFT {
+    pub fun borrowDAAM(id: UInt64): &DAAMDAAM_V1.NFT {
         pre { self.ownedNFTs[id] != nil : "Invalid TokenID" }
         let ref = (&self.ownedNFTs[id] as! auth &NonFungibleToken.NFT?)!
-        let daam = ref as! &DAAM.NFT
+        let daam = ref as! &DAAMDAAM_V1.NFT
         return daam
     }
 
@@ -1092,7 +1092,7 @@ pub resource Admin: Agent
                 !DAAM.getRequestValidity(mid: mid) : "Request already is settled."
                 DAAM.getAgentCreators(agent: self.owner!.address)!.contains(creator): "This is not your Creator."
             }
-            let ref = &DAAM.request[mid] as &Request?
+            let ref = &DAAMDAAM_V1.request[mid] as &Request?
 
             let royalties    = [ MetadataViews.Royalty(
             receiver: getAccount(creator).getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath()),
@@ -1161,7 +1161,7 @@ pub struct CreatorInfo {
 
             !DAAM.getRequestValidity(mid: mid) : "Request already is settled."
         }
-            let ref = &DAAM.request[mid] as &Request?
+            let ref = &DAAMDAAM_V1.request[mid] as &Request?
             let royalties    = [ MetadataViews.Royalty(
                 receiver: getAccount(self.grantee).getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath()),
                 cut: percentage,
@@ -1200,7 +1200,7 @@ pub struct CreatorInfo {
             }
 
             let mid = metadata.mid               // Get MID
-            let nft <- create NFT(metadata: <- metadata, request: &DAAM.request[mid] as &Request?) // Create NFT
+            let nft <- create NFT(metadata: <- metadata, request: &DAAMDAAM_V1.request[mid] as &Request?) // Create NFT
 
             // Update Request, if last remove.
             if isLast {
@@ -1424,7 +1424,7 @@ pub resource MinterAccess
             mid !=0 && mid <= DAAM.metadataCounterID : "Illegal Operation: validate"
             DAAM.request.containsKey(mid) : "Invalid MID"
         }
-        let request = &DAAM.request[mid] as &Request?
+        let request = &DAAMDAAM_V1.request[mid] as &Request?
         let royalty = request!.royalty!
         return royalty
     } 

@@ -4,14 +4,14 @@
 import DAAM from 0x7db4d10c78bad30a
 
 transaction(agent: Address, status: Bool) {
-    let admin   : &DAAM.Admin
+    let admin   : &DAAMDAAM_V1.Admin
     let agent : Address
     let status  : Bool
 
     prepare(agent: AuthAccount) {
         self.agent = agent  
         self.status  = status
-        self.admin = agent.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath)!
+        self.admin = agent.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath)!
     }
 
     pre { DAAM.isAgent(agent) != nil : agent.toString().concat(" is not a Agent.") }

@@ -11,13 +11,13 @@ transaction()
 {
     //let crypto: &FungibleToken.Vault
     let path  : PublicPath
-    let admin : &DAAM.Admin
+    let admin : &DAAMDAAM_V1.Admin
 
     prepare(admin: AuthAccount) {
        
         //self.crypto = crypto
         self.path   = /public/fusdReceiver
-        self.admin  = admin.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath)!
+        self.admin  = admin.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath)!
     }
 
     execute {

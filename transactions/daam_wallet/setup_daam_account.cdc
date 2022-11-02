@@ -16,7 +16,7 @@ transaction(public: Bool)
     let have_mft: Bool
 
     prepare(acct: AuthAccount) {
-        if acct.borrow<&DAAM.Collection>(from: DAAM.collectionStoragePath) != nil {
+        if acct.borrow<&DAAMDAAM_V1.Collection>(from: DAAM.collectionStoragePath) != nil {
             self.have_collection = true
             panic("You already have a DAAM Collection.")
         } else {
@@ -40,7 +40,7 @@ transaction(public: Bool)
             self.acct.save<@NonFungibleToken.Collection>(<-collection, to: DAAM.collectionStoragePath) // save the new account
             
             if self.public {
-                self.acct.link<&DAAM.Collection{DAAM.CollectionPublic, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection, MetadataViews.Resolver}>(DAAM.collectionPublicPath, target: DAAM.collectionStoragePath)
+                self.acct.link<&DAAMDAAM_V1.Collection{DAAM.CollectionPublic, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection, MetadataViews.Resolver}>(DAAM.collectionPublicPath, target: DAAM.collectionStoragePath)
                 log("DAAM Account Created. You have a DAAM Collection (Public) to store NFTs'")
             } else {
                 log("DAAM Account Created. You have a DAAM Collection (Non-Public) to store NFTs'")

@@ -23,8 +23,8 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
     interact: AnyStruct?)
 {    
     let creator     : Address   
-    let metadataGen : &DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}
-    let agent       : &DAAM.Admin{DAAM.Agent}
+    let metadataGen : &DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}
+    let agent       : &DAAMDAAM_V1.Admin{DAAM.Agent}
 
     let name        : String
     let max         : UInt64?
@@ -38,8 +38,8 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
     prepare(agent: AuthAccount) {
         self.creator      = creator
         self.metadataGen  = getAccount(self.creator)
-            .getCapability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}>(DAAM.metadataPublicPath).borrow()!
-        self.agent        = agent.borrow<&DAAM.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+            .getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}>(DAAM.metadataPublicPath).borrow()!
+        self.agent        = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
         self.name         = name
         self.max          = max
         self.description  = description

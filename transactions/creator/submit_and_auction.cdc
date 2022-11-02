@@ -37,9 +37,9 @@ transaction(
     incrementByPrice: Bool, incrementAmount: UFix64, startingBid: UFix64, reserve: UFix64, buyNow: UFix64, reprint: UInt64?
     )
 {    
-    let requestGen  : &DAAM.RequestGenerator
-    let metadataGen : &DAAM.MetadataGenerator
-    let metadataCap : Capability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint}>
+    let requestGen  : &DAAMDAAM_V1.RequestGenerator
+    let metadataGen : &DAAMDAAM_V1.MetadataGenerator
+    let metadataCap : Capability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>
     let auctionHouse: &AuctionHouse.AuctionWallet
 
     let name        : String
@@ -65,10 +65,10 @@ transaction(
     let reprint     : UInt64?
 
     prepare(creator: AuthAccount) {
-        self.metadataGen  = creator.borrow<&DAAM.MetadataGenerator>(from: DAAM.metadataStoragePath)!
-        self.requestGen   = creator.borrow<&DAAM.RequestGenerator>( from: DAAM.requestStoragePath)!
+        self.metadataGen  = creator.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM.metadataStoragePath)!
+        self.requestGen   = creator.borrow<&DAAMDAAM_V1.RequestGenerator>( from: DAAM.requestStoragePath)!
         self.auctionHouse = creator.borrow<&AuctionHouse.AuctionWallet>(from: AuctionHouse.auctionStoragePath)!
-        self.metadataCap  = creator.getCapability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint}>(DAAM.metadataPublicPath)!
+        self.metadataCap  = creator.getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>(DAAM.metadataPublicPath)!
         
         self.name         = name
         self.max          = max

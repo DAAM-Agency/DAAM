@@ -7,11 +7,11 @@ import DAAM from 0x7db4d10c78bad30a
 
 transaction(newAgent: Address, minterAccess: Bool)
 {
-    let admin    : &DAAM.Admin
+    let admin    : &DAAMDAAM_V1.Admin
     let newAgent : Address 
 
     prepare(admin: AuthAccount) {
-        self.admin    = admin.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath)!
+        self.admin    = admin.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath)!
         self.newAgent = newAgent
     }
 

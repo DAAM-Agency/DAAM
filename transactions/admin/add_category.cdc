@@ -6,11 +6,11 @@ import DAAM       from 0x7db4d10c78bad30a
 
 transaction(category: String) {
     let category: String
-    let admin   : &DAAM.Admin
+    let admin   : &DAAMDAAM_V1.Admin
 
     prepare(admin: AuthAccount) {
         self.category = category
-        self.admin    = admin.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath)!
+        self.admin    = admin.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath)!
     }
 
     pre { !Categories.getCategories().contains(category) }

@@ -10,8 +10,8 @@ transaction(creator: Address, mid: UInt64, start: UFix64, length: UFix64, isExte
     incrementByPrice: Bool, incrementAmount: UFix64, startingBid: UFix64?, reserve: UFix64, buyNow: UFix64, reprintSeries: UInt64?)
 {
     let auctionHouse     : &AuctionHouse.AuctionWallet{AuctionHouse.AuctionWalletPublic}
-    let metadataGenerator: Capability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint}>
-    let agent       : &DAAM.Admin{DAAM.Agent}
+    let metadataGenerator: Capability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>
+    let agent       : &DAAMDAAM_V1.Admin{DAAM.Agent}
     let mid         : UInt64
     let start       : UFix64
     let length      : UFix64
@@ -25,10 +25,10 @@ transaction(creator: Address, mid: UInt64, start: UFix64, length: UFix64, isExte
     let reprintSeries   : UInt64?
 
     prepare(agent: AuthAccount) {
-        self.agent = agent.borrow<&DAAM.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+        self.agent = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
 
         self.metadataGenerator  = getAccount(creator)
-            .getCapability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint}>
+            .getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>
             (DAAM.metadataPublicPath)
 
         self.auctionHouse = getAccount(creator)

@@ -7,8 +7,8 @@ import DAAM          from 0x7db4d10c78bad30a
 transaction(mid: UInt64, percentage: UFix64 ) {
     let mid        : UInt64
     let royalty    : MetadataViews.Royalties
-    let requestGen : &DAAM.RequestGenerator
-    let metadataGen: &DAAM.MetadataGenerator
+    let requestGen : &DAAMDAAM_V1.RequestGenerator
+    let metadataGen: &DAAMDAAM_V1.MetadataGenerator
 
     prepare(signer: AuthAccount) {
         let royalties    = [ MetadataViews.Royalty(
@@ -19,8 +19,8 @@ transaction(mid: UInt64, percentage: UFix64 ) {
         self.royalty = MetadataViews.Royalties(royalties)
 
         self.mid         = mid
-        self.requestGen  = signer.borrow<&DAAM.RequestGenerator>( from: DAAM.requestStoragePath)!
-        self.metadataGen = signer.borrow<&DAAM.MetadataGenerator>(from: DAAM.metadataStoragePath)!
+        self.requestGen  = signer.borrow<&DAAMDAAM_V1.RequestGenerator>( from: DAAM.requestStoragePath)!
+        self.metadataGen = signer.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM.metadataStoragePath)!
     }
 
     execute {

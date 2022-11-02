@@ -7,11 +7,11 @@ import AuctionHouse from 0x045a1763c93006ca
 transaction(mid: UInt64)
 {
     let mid: UInt64
-    let admin: &DAAM.Admin
+    let admin: &DAAMDAAM_V1.Admin
 
     prepare(admin: AuthAccount) {
         self.mid = mid
-        self.admin = admin.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath) ?? panic("You are not an Admin.")
+        self.admin = admin.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath) ?? panic("You are not an Admin.")
     }
 
     execute {

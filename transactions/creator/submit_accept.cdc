@@ -25,8 +25,8 @@ transaction(name: String, max: UInt64?, categories: [String], description: Strin
                                                                                 // within default range, then accept default can be used.
 {    
     let creatorCap  : Capability<&AnyResource{FungibleToken.Receiver}>
-    let requestGen  : &DAAM.RequestGenerator
-    let metadataGen : &DAAM.MetadataGenerator
+    let requestGen  : &DAAMDAAM_V1.RequestGenerator
+    let metadataGen : &DAAMDAAM_V1.MetadataGenerator
 
     let name        : String
     let max         : UInt64?
@@ -40,8 +40,8 @@ transaction(name: String, max: UInt64?, categories: [String], description: Strin
 
     prepare(creator: AuthAccount) {
         self.creatorCap  = creator.getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
-        self.metadataGen = creator.borrow<&DAAM.MetadataGenerator>(from: DAAM.metadataStoragePath)!
-        self.requestGen  = creator.borrow<&DAAM.RequestGenerator>( from: DAAM.requestStoragePath)!
+        self.metadataGen = creator.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM.metadataStoragePath)!
+        self.requestGen  = creator.borrow<&DAAMDAAM_V1.RequestGenerator>( from: DAAM.requestStoragePath)!
 
         self.name         = name
         self.max          = max

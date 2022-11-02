@@ -5,11 +5,11 @@ import DAAM from 0x7db4d10c78bad30a
 
 transaction(exMinter: Address)
 {
-    let admin    : &DAAM.Admin
+    let admin    : &DAAMDAAM_V1.Admin
     let exMinter : Address
 
     prepare(admin: AuthAccount) {
-        self.admin = admin.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath) ?? panic(exMinter.toString().concat(" is not a Minter."))
+        self.admin = admin.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath) ?? panic(exMinter.toString().concat(" is not a Minter."))
 	    self.exMinter = exMinter
     }
 

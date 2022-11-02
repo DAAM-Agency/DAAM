@@ -8,13 +8,13 @@ import DAAM from 0x7db4d10c78bad30a
 transaction(burn: UInt64) {
 
     // Reference to the withdrawer's collection
-    let withdrawRef: &DAAM.Collection
+    let withdrawRef: &DAAMDAAM_V1.Collection
     let tokenID    : UInt64
 
     prepare(signer: AuthAccount) {
         // borrow a reference to the signer's NFT collection
         self.withdrawRef = signer
-            .borrow<&DAAM.Collection>(from: DAAM.collectionStoragePath)
+            .borrow<&DAAMDAAM_V1.Collection>(from: DAAM.collectionStoragePath)
             ?? panic("Account does not store an object at the specified path")
 
         self.tokenID = burn

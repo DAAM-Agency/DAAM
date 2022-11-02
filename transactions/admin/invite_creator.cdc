@@ -6,12 +6,12 @@ import DAAM from 0x7db4d10c78bad30a
 
 transaction(creator: Address, agentCut: UFix64)
 {
-    let admin  : &DAAM.Admin{DAAM.Agent}
+    let admin  : &DAAMDAAM_V1.Admin{DAAM.Agent}
     let creator : Address
     let agentCut: UFix64
 
     prepare(agent: AuthAccount) {
-        self.admin    = agent.borrow<&DAAM.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+        self.admin    = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
         self.creator  = creator
         self.agentCut = agentCut
     }

@@ -31,7 +31,7 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
 {   
     // Metadata
     let creator     : Address   
-    let agent       : &DAAM.Admin{DAAM.Agent}
+    let agent       : &DAAMDAAM_V1.Admin{DAAM.Agent}
 
     let name        : String
     let max         : UInt64?
@@ -44,8 +44,8 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
 
     // Auction
     let auctionHouse    : &AuctionHouse.AuctionWallet{AuctionHouse.AuctionWalletPublic}
-    let metadataCap     : Capability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint}>
-    let metadataGen     : &DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}
+    let metadataCap     : Capability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>
+    let metadataGen     : &DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}
     let start           : UFix64
     let length          : UFix64
     let isExtended      : Bool
@@ -61,10 +61,10 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
         // Metadata
         self.creator      = creator
         self.metadataGen  = getAccount(self.creator)
-            .getCapability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}>(DAAM.metadataPublicPath).borrow()!
+            .getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}>(DAAM.metadataPublicPath).borrow()!
 
         self.metadataCap  = getAccount(creator)
-            .getCapability<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint}>
+            .getCapability<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint}>
             (DAAM.metadataPublicPath)
 
         self.name         = name
@@ -82,7 +82,7 @@ transaction(creator: Address, name: String, max: UInt64?, categories: [String], 
         }
 
         // Auction
-        self.agent = agent.borrow<&DAAM.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+        self.agent = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
 
         self.auctionHouse = getAccount(creator)
             .getCapability<&AuctionHouse.AuctionWallet{AuctionHouse.AuctionWalletPublic}>

@@ -13,7 +13,7 @@ pub fun setFile(string: String, type: String): {MetadataViews.File} {
 transaction(name: String, description: String, externalURL: String, squareImage: String, squareImageType: String,
     bannerImage: String, bannerImageType: String, social: String?, web: String? )
 {
-    let collectionRef : &DAAM.Collection
+    let collectionRef : &DAAMDAAM_V1.Collection
     let name          : String
     let description   : String
     let externalURL   : MetadataViews.ExternalURL
@@ -23,7 +23,7 @@ transaction(name: String, description: String, externalURL: String, squareImage:
 
     prepare(acct: AuthAccount) {
         // Borrow a reference from the stored collection`
-        self.collectionRef = acct.borrow<&DAAM.Collection>(from: DAAM.collectionStoragePath)!
+        self.collectionRef = acct.borrow<&DAAMDAAM_V1.Collection>(from: DAAM.collectionStoragePath)!
             //?? panic("Could not borrow a reference to the owner's collection")
         self.name              = name // Get name of collection
         self.description       = description

@@ -5,11 +5,11 @@
 import DAAM from 0x7db4d10c78bad30a
 
 transaction(exAgent: Address) {
-    let admin   : &DAAM.Admin
+    let admin   : &DAAMDAAM_V1.Admin
     let exAgent : Address
 
     prepare(admin: AuthAccount) {
-        self.admin = admin.borrow<&DAAM.Admin>(from: DAAM.adminStoragePath) ?? panic(exAgent.toString().concat(" is not an Agent."))
+        self.admin = admin.borrow<&DAAMDAAM_V1.Admin>(from: DAAM.adminStoragePath) ?? panic(exAgent.toString().concat(" is not an Agent."))
 	    self.exAgent = exAgent
     }
 

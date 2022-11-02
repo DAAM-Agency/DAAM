@@ -8,11 +8,11 @@ transaction(mid: UInt64)
 {    
     let creator     : AuthAccount
     let mid         : UInt64
-    let metadataGen : &DAAM.MetadataGenerator
+    let metadataGen : &DAAMDAAM_V1.MetadataGenerator
 
     prepare(creator: AuthAccount) {
         self.creator = creator
-        self.metadataGen = self.creator.borrow<&DAAM.MetadataGenerator>(from: DAAM.metadataStoragePath)!
+        self.metadataGen = self.creator.borrow<&DAAMDAAM_V1.MetadataGenerator>(from: DAAM.metadataStoragePath)!
         self.mid = mid
     }
 

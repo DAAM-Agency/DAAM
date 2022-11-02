@@ -17,19 +17,19 @@ transaction(submit: Bool) {
         if !DAAM_Profile.check(self.signer.address) {
             let daamProfile = DAAM_Profile.createProfile()
             self.signer.save(<- daamProfile, to: DAAM_Profile.storagePath)
-            self.signer.link<&DAAM_Profile.User{DAAM_Profile.Public}>(DAAM_Profile.publicPath, target: DAAM_Profile.storagePath)
+            self.signer.link<&DAAMDAAM_V1_Profile.User{DAAM_Profile.Public}>(DAAM_Profile.publicPath, target: DAAM_Profile.storagePath)
         }
 
         let creator <- DAAM.answerCreatorInvite(newCreator: self.signer, submit: self.submit)
         if creator != nil {
             let old_creator <- self.signer.load<@AnyResource>(from: DAAM.creatorStoragePath)
             self.signer.save<@DAAM.Creator>(<- creator!, to: DAAM.creatorStoragePath)
-            let creatorRef = self.signer.borrow<&DAAM.Creator>(from: DAAM.creatorStoragePath)!
+            let creatorRef = self.signer.borrow<&DAAMDAAM_V1.Creator>(from: DAAM.creatorStoragePath)!
             destroy old_creator
 
             let old_mg <- self.signer.load<@AnyResource>(from: DAAM.metadataStoragePath)
             let metadataGen <- creatorRef.newMetadataGenerator()
-            self.signer.link<&DAAM.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}>(DAAM.metadataPublicPath, target: DAAM.metadataStoragePath)
+            self.signer.link<&DAAMDAAM_V1.MetadataGenerator{DAAM.MetadataGeneratorMint, DAAM.MetadataGeneratorPublic}>(DAAM.metadataPublicPath, target: DAAM.metadataStoragePath)
             self.signer.save<@DAAM.MetadataGenerator>(<- metadataGen, to: DAAM.metadataStoragePath)
             destroy old_mg
 

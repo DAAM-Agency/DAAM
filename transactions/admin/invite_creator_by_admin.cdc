@@ -10,7 +10,7 @@ transaction(creator: Address)
     let creator : Address
 
     prepare(agent: AuthAccount) {
-        self.admin   = agent.borrow<&DAAM.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
+        self.admin   = agent.borrow<&DAAMDAAM_V1.Admin{DAAM.Agent}>(from: DAAM.adminStoragePath)!
         self.creator = creator
     }
 
