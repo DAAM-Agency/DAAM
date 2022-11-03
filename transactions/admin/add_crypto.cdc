@@ -1,5 +1,5 @@
 // add_crypto.cdc
-// Settles all auctions that have ended. Including Items, returning funds, etc.
+// Added a new Crypto Token to the Auction House
 
 import FungibleToken from 0xf233dcee88fe0abe
 import FUSD          from 0x3c5959b568896393
