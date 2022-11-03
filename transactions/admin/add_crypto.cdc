@@ -22,7 +22,7 @@ transaction()
 
     execute {
         let vault <-FUSD.createEmptyVault()
-        AuctionHouse_V14.addCrypto(crypto: &vault as &FungibleToken.Vault, path: self.path, permission: self.admin)
+        AuctionHouse.addCrypto(crypto: &vault as &FungibleToken.Vault, path: self.path, permission: self.admin)
         destroy vault
     }
 }
