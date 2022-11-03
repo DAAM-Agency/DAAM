@@ -1,4 +1,4 @@
-// add_fee.cdc
+// add_crypto.cdc
 // Settles all auctions that have ended. Including Items, returning funds, etc.
 
 import FungibleToken from 0xf233dcee88fe0abe
