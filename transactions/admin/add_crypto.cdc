@@ -1,7 +1,4 @@
 // add_crypto.cdc
-<<<<<<< HEAD
-// Returns all accepted Cryptos from AuctionHouse
-=======
 // Added a new Crypto Token to the Auction House
 >>>>>>> d411209e30ef24393b994dc0705949d2cbbd649e
 
