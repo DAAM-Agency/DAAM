@@ -1,5 +1,9 @@
 // add_crypto.cdc
+<<<<<<< HEAD
 // Returns all accepted Cryptos from AuctionHouse
+=======
+// Added a new Crypto Token to the Auction House
+>>>>>>> d411209e30ef24393b994dc0705949d2cbbd649e
 
 import FungibleToken from 0xf233dcee88fe0abe
 import FUSD          from 0x3c5959b568896393 
