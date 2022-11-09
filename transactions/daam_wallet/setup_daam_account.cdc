@@ -5,7 +5,7 @@
 import NonFungibleToken   from 0x1d7e57aa55817448
 import FungibleToken      from 0xf233dcee88fe0abe
 import MetadataViews      from 0x1d7e57aa55817448
-import MultiFungibleToken from 0xfa1c6cfe182ee46b
+import MultiFungibleToken from 0x229e7617283d5085
 import DAAM               from 0x7db4d10c78bad30a
 
 transaction(public: Bool)
@@ -62,3 +62,4 @@ transaction(public: Bool)
         }
     }
 }
+ 
