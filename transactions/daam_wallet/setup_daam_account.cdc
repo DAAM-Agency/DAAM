@@ -18,14 +18,14 @@ transaction(public: Bool)
     prepare(acct: AuthAccount) {
         if acct.borrow<&DAAM.Collection>(from: DAAM.collectionStoragePath) != nil {
             self.have_collection = true
-            panic("You already have a DAAM Collection.")
+            //panic("You already have a DAAM Collection.")
         } else {
             self.have_collection = false
         }
 
         if acct.borrow<&MultiFungibleToken.MultiFungibleTokenManager{MultiFungibleToken.MultiFungibleTokenBalance}>(from: MultiFungibleToken.MultiFungibleTokenStoragePath) != nil {
             self.have_mft = true
-            panic("You already have a Multi-FungibleToken-Manager.")
+            //panic("You already have a Multi-FungibleToken-Manager.")
         } else {
             self.have_mft = false
         }
